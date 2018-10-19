@@ -36,7 +36,7 @@ namespace GOTO.Logic.Actions
 			var expressionStringValue = expression.GetValue<string>(this);
 				
 			if(cachedExpression==null || expressionStringValue != cachedExpressionString)
-                InitializeCaches(expressionStringValue);
+				InitializeCaches(expressionStringValue);
 
 			object[] outputComponents = new object[outputComponentCount];
 
@@ -66,23 +66,23 @@ namespace GOTO.Logic.Actions
 			SetFinished();
 		}
 
-        private void InitializeCaches(string expressionStringValue)
-        {
-            var parser = new ExpressionParser();
-            cachedExpressionString = expressionStringValue;
-            cachedExpression = parser.EvaluateExpression(cachedExpressionString.ToLower());
+		private void InitializeCaches(string expressionStringValue)
+		{
+			var parser = new ExpressionParser();
+			cachedExpressionString = expressionStringValue;
+			cachedExpression = parser.EvaluateExpression(cachedExpressionString.ToLower());
 
-            outputType = typeof(float);
+			outputType = typeof(float);
 			
 			System.Type[] types = new System.Type[inputs.Length];
-            for (int i = 0; i < inputs.Length; i++)
-            {
-                types[i] = inputs[i].GetVariable(this).Type;
-                if (types[i] != typeof(float) && types[i] != typeof(Vector2) && types[i] != typeof(Vector3))
-                {
-                    Debug.LogError("Expression Action only supports float, Vector2 and Vector3 variables!");
-                }
-            }
+			for (int i = 0; i < inputs.Length; i++)
+			{
+				types[i] = inputs[i].GetVariable(this).Type;
+				if (types[i] != typeof(float) && types[i] != typeof(Vector2) && types[i] != typeof(Vector3))
+				{
+					Debug.LogError("Expression Action only supports float, Vector2 and Vector3 variables!");
+				}
+			}
 
 			if(types.Contains(typeof(Vector2)) && types.Contains(typeof(Vector3)))
 			{
@@ -104,7 +104,7 @@ namespace GOTO.Logic.Actions
 				outputType = typeof(float);
 				outputComponentCount = 1;
 			}	
-        }
+		}
 	}
 }
 
