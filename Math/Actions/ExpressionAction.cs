@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -44,15 +44,17 @@ namespace GOTO.Logic.Actions
 			{
 				for (int i=0; i<inputs.Length; i++)
 				{
-					System.Type type = inputs[i].GetVariable(this).Type;
-					if(type == typeof(float))				
-						cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<float>(this);
-					else if(type == typeof(Vector2))
-						cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<Vector2>(this)[c];
-					else if(type == typeof(Vector3))
-						cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<Vector3>(this)[c];
+					if (cachedExpression.Parameters.ContainsKey(alphabet[i]))
+					{
+						System.Type type = inputs[i].GetVariable(this).Type;
+						if (type == typeof(float))
+							cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<float>(this);
+						else if (type == typeof(Vector2))
+							cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<Vector2>(this)[c];
+						else if (type == typeof(Vector3))
+							cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<Vector3>(this)[c];
+					}
 				}
-
 				outputComponents[c] = (float)cachedExpression.Value;
 			}
 
