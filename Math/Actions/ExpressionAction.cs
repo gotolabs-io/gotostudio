@@ -22,7 +22,7 @@ namespace GOTO.Logic.Actions
 
 		private string cachedExpressionString;
 		private Expression cachedExpression;
-		private System.Type outputType;
+		private System.Type evaluatedOutputType;
 		private int outputComponentCount;
 		
 		public ExpressionAction()
@@ -49,21 +49,36 @@ namespace GOTO.Logic.Actions
 						System.Type type = inputs[i].GetVariable(this).Type;
 						if (type == typeof(float))
 							cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<float>(this);
+						else if (type == typeof(int))
+							cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<int>(this);
 						else if (type == typeof(Vector2))
 							cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<Vector2>(this)[c];
 						else if (type == typeof(Vector3))
 							cachedExpression.Parameters[alphabet[i]].Value = inputs[i].GetValue<Vector3>(this)[c];
 					}
 				}
-				outputComponents[c] = (float)cachedExpression.Value;
+				if(evaluatedOutputType != typeof(int))
+					outputComponents[c] = (float)cachedExpression.Value;
+				else
+					outputComponents[c] = (int)cachedExpression.Value;
 			}
 
-			if(outputType == typeof(float))
+			System.Type outputVariableType = output.IsValid ? GetVariable(output.GUID).Variable.Type : null;
+
+			if(outputVariableType == typeof(float) && evaluatedOutputType == typeof(float))
 				output.SetValue((float)outputComponents[0], this);
-			else if(outputType == typeof(Vector2))
+			else if (outputVariableType == typeof(float) && evaluatedOutputType == typeof(int))
+				output.SetValue((float)(int)outputComponents[0], this);
+			else if (outputVariableType == typeof(int) && evaluatedOutputType == typeof(int))
+				output.SetValue((int)outputComponents[0], this);
+			else if (outputVariableType == typeof(int) && evaluatedOutputType == typeof(float))
+				output.SetValue((int)(float)outputComponents[0], this);
+			else if(evaluatedOutputType == typeof(Vector2) && outputVariableType == typeof(Vector2))
 				output.SetValue(new Vector2((float)outputComponents[0], (float)outputComponents[1]), this);
-			else if(outputType == typeof(Vector3))
+			else if(evaluatedOutputType == typeof(Vector3) && outputVariableType == typeof(Vector3))
 				output.SetValue(new Vector3((float)outputComponents[0], (float)outputComponents[1], (float)outputComponents[2]), this);	
+			else if(output.IsValid)
+				Debug.LogError("Expression type ("+ evaluatedOutputType +") and output variable type (" + outputVariableType +") do not match.");
 
 			SetFinished();
 		}
@@ -74,15 +89,13 @@ namespace GOTO.Logic.Actions
 			cachedExpressionString = expressionStringValue;
 			cachedExpression = parser.EvaluateExpression(cachedExpressionString.ToLower());
 
-			outputType = typeof(float);
-			
 			System.Type[] types = new System.Type[inputs.Length];
 			for (int i = 0; i < inputs.Length; i++)
 			{
 				types[i] = inputs[i].GetVariable(this).Type;
-				if (types[i] != typeof(float) && types[i] != typeof(Vector2) && types[i] != typeof(Vector3))
+				if (types[i] != typeof(int) && types[i] != typeof(float) && types[i] != typeof(Vector2) && types[i] != typeof(Vector3))
 				{
-					Debug.LogError("Expression Action only supports float, Vector2 and Vector3 variables!");
+					Debug.LogError("Expression Action only supports int, float, Vector2 and Vector3 variables!");
 				}
 			}
 
@@ -93,19 +106,24 @@ namespace GOTO.Logic.Actions
 			
 			if(types.Contains(typeof(Vector3)))
 			{
-				outputType = typeof(Vector3);
+				evaluatedOutputType = typeof(Vector3);
 				outputComponentCount = 3;
 			}
 			else if(types.Contains(typeof(Vector2)))
 			{
-				outputType = typeof(Vector2);
+				evaluatedOutputType = typeof(Vector2);
 				outputComponentCount = 2;
+			}
+			else if(types.Contains(typeof(float)))
+			{
+				evaluatedOutputType = typeof(float);
+				outputComponentCount = 1;
 			}
 			else
 			{
-				outputType = typeof(float);
+				evaluatedOutputType = typeof(int);
 				outputComponentCount = 1;
-			}	
+			}
 		}
 	}
 }
